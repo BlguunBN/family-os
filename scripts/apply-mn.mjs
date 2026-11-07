@@ -152,6 +152,30 @@ const MAP = {
 	'Something went wrong. Please try again.': 'Алдаа гарлаа. Дахин оролдоно уу.',
 	'Try again': 'Дахин оролдох',
 	'No access': 'Нэвтрэлт байхгүй',
+
+	// --- login / PIN notice ---
+	'Signing in with a PIN works only on family devices. An admin can turn this device into a family device after signing in.':
+		'PIN кодоор нэвтрэх нь зөвхөн гэр бүлийн төхөөрөмж дээр хүчинтэй. Админ нэвтэрсэний дараа энэ төхөөрөмжийг гэр бүлийн төхөөрөмж болгож болно.',
+
+	// --- home page chrome ---
+	'Set up the AI': 'AI-г тохируулах',
+	'Set up AI': 'AI-г тохируулах',
+	'Not now': 'Одоо биш',
+	'Ask the assistant': 'Туслахас асуух',
+	'Calendar, tasks, shopping and more': 'Хуанли, ажлууд, худалдан авах болон бусад',
+	'open': 'нээлттэй',
+	'items to get': 'авах зүйлс',
+	'and {{count}} more': 'болон {{count}} илүү',
+	'NEXT DAYS': 'ДАРААГИЙН ӨДРҮҮД',
+	'ON THE BOARD': 'САМБАР ДЭЭР',
+	'TASKS': 'АЖЛУУД',
+	'SHOPPING': 'ХУДАЛДАН АВАХ',
+	'KITCHEN': 'ГАЛ ТОГОО',
+	'FAMILY': 'ГЭР БҮЛ',
+	'Tomorrow': 'Маргааш',
+	'Good evening': 'Оройн мэнд',
+	'Good morning': 'Өглөөний мэнд',
+	'Good afternoon': 'Өдрийн мэнд',
 };
 
 let total = 0;
