@@ -1,0 +1,8 @@
+{
+	"code": "mn",
+	"name": "Mongolian",
+	"nativeName": "монгол",
+	"version": "0.1.0",
+	"famos": ">=0.1.0",
+	"authors": []
+}
