@@ -242,6 +242,84 @@ const run = db.transaction(() => {
 	for (const n of notes) {
 		insNote.run({ id: sid('board_note'), text: n.text, pinned: n.pinned, position: n.position, createdBy: adminId, now: NOW });
 	}
+
+	// --- Home --------------------------------------------------------------
+	db.prepare('delete from home_items where home_id in (select id from home_homes where created_by = ?)').run(adminId);
+	db.prepare('delete from home_services where home_id in (select id from home_homes where created_by = ?)').run(adminId);
+	db.prepare('delete from home_homes where created_by = ?').run(adminId);
+	const homeId = sid('home');
+	db.prepare('insert into home_homes (id, name, address, tenure, notes, created_by, created_at, updated_at) values (?,?,?,?,?,?,?,?)')
+		.run(homeId, 'Family apartment', 'Ulaanbaatar, Khan-Uul district', 'owner', '2 bedrooms, 3rd floor, south facing', adminId, NOW, NOW);
+
+	const insHomeItem = db.prepare(`
+		insert into home_items (id, home_id, name, room, brand, model, serial, purchased_on, warranty_until, notes, created_by, created_at, updated_at)
+		values (?,?,?,?,?,?,?,?,?,?,?,?,?)
+	`);
+	const homeItems = [
+		{ name: 'Refrigerator', room: 'Kitchen', brand: 'Samsung', model: 'RT38', serial: 'SN-REF-2023-001', purchasedOn: '2023-05-12', warrantyUntil: '2028-05-12', notes: '10-year compressor warranty.' },
+		{ name: 'Washing machine', room: 'Bathroom', brand: 'LG', model: 'F2', serial: 'SN-WM-2022-114', purchasedOn: '2022-09-03', warrantyUntil: '2027-09-03', notes: 'Clean filter monthly.' },
+		{ name: 'Television', room: 'Living room', brand: 'LG', model: 'OLED55', serial: 'SN-TV-2024-207', purchasedOn: '2024-01-20', warrantyUntil: '2026-01-20', notes: 'Wall mounted.' },
+	];
+	for (const it of homeItems) {
+		insHomeItem.run(sid('home_item'), homeId, it.name, it.room, it.brand, it.model, it.serial, it.purchasedOn, it.warrantyUntil, it.notes, adminId, NOW, NOW);
+	}
+
+	const insService = db.prepare(`
+		insert into home_services (id, home_id, kind, provider, account_number, due_day, notes, created_by, created_at, updated_at)
+		values (?,?,?,?,?,?,?,?,?,?)
+	`);
+	const services = [
+		{ kind: 'water', provider: 'USUG', accountNumber: 'UB-102938', dueDay: 15, notes: 'Water and sewage.' },
+		{ kind: 'electricity', provider: 'UBEDN', accountNumber: 'UB-556677', dueDay: 10, notes: 'Electricity bill.' },
+		{ kind: 'internet', provider: 'Unitel', accountNumber: 'UNITEL-8899', dueDay: 25, notes: 'Fiber 300 Mbps.' },
+	];
+	for (const s of services) {
+		insService.run(sid('home_service'), homeId, s.kind, s.provider, s.accountNumber, s.dueDay, s.notes, adminId, NOW, NOW);
+	}
+
+	// --- Pets --------------------------------------------------------------
+	db.prepare('delete from pets_treatments where pet_id in (select id from pets_pets where created_by = ?)').run(adminId);
+	db.prepare('delete from pets_pets where created_by = ?').run(adminId);
+	const insPet = db.prepare(`
+		insert into pets_pets (id, name, species, breed, sex, birth_date, chip_number, vet, member_ids, notes, created_by, created_at, updated_at)
+		values (?,?,?,?,?,?,?,?,?,?,?,?,?)
+	`);
+	const insTreatment = db.prepare(`
+		insert into pets_treatments (id, pet_id, kind, given_on, product, batch, vet, notes, document_id, created_by, created_at)
+		values (?,?,?,?,?,?,?,?,?,?,?)
+	`);
+	const pets = [
+		{ name: 'Buddy', species: 'dog', breed: 'Mongolian bankhar', sex: 'male', birthDate: '2023-04-10', chipNumber: 'MN-BUD-001', vet: 'City Vet Clinic', memberIds: [MEMBERS.temuulen, adminId], notes: 'Loves running in the steppe.' },
+		{ name: 'Mochi', species: 'cat', breed: 'Domestic shorthair', sex: 'female', birthDate: '2024-02-14', chipNumber: 'MN-MOC-002', vet: 'City Vet Clinic', memberIds: [MEMBERS.nomin], notes: 'Indoor cat, shy with guests.' },
+	];
+	for (const p of pets) {
+		const petId = sid('pet');
+		insPet.run(petId, p.name, p.species, p.breed, p.sex, p.birthDate, p.chipNumber, p.vet, JSON.stringify(p.memberIds), p.notes, adminId, NOW, NOW);
+		insTreatment.run(sid('pet_treatment'), petId, 'vaccination', '2026-09-15', 'Rabies vaccine', 'BATCH-2026-09', p.vet, 'Annual booster.', null, adminId, NOW);
+		insTreatment.run(sid('pet_treatment'), petId, 'deworming', '2026-06-01', 'Broad-spectrum dewormer', null, p.vet, 'Oral tablet.', null, adminId, NOW);
+	}
+
+	// --- Vehicles ----------------------------------------------------------
+	db.prepare('delete from vehicles_logs where vehicle_id in (select id from vehicles_vehicles where created_by = ?)').run(adminId);
+	db.prepare('delete from vehicles_vehicles where created_by = ?').run(adminId);
+	const insVehicle = db.prepare(`
+		insert into vehicles_vehicles (id, name, plate, make, model, year, fuel, vin, member_ids, notes, created_by, created_at, updated_at)
+		values (?,?,?,?,?,?,?,?,?,?,?,?,?)
+	`);
+	const insVehicleLog = db.prepare(`
+		insert into vehicles_logs (id, vehicle_id, kind, done_on, place, notes, document_id, created_by, created_at)
+		values (?,?,?,?,?,?,?,?,?)
+	`);
+	const vehicles = [
+		{ name: 'Family car', plate: 'UB 1234 UBN', make: 'Toyota', model: 'Prius', year: 2019, fuel: 'hybrid', vin: 'JTDKN3DU3L0000000', memberIds: [adminId, MEMBERS.batbayar], notes: 'Daily commuter.' },
+		{ name: 'Motorcycle', plate: 'UB 9876 UBN', make: 'Honda', model: 'CB500F', year: 2021, fuel: 'petrol', vin: 'JH2PC400000000000', memberIds: [MEMBERS.batbayar], notes: 'Weekend rides.' },
+	];
+	for (const v of vehicles) {
+		const vehicleId = sid('vehicle');
+		insVehicle.run(vehicleId, v.name, v.plate, v.make, v.model, v.year, v.fuel, v.vin, JSON.stringify(v.memberIds), v.notes, adminId, NOW, NOW);
+		insVehicleLog.run(sid('vehicle_log'), vehicleId, 'service', '2026-09-20', 'Toyota Service Center', 'Oil change, filter, brake check.', null, adminId, NOW);
+		insVehicleLog.run(sid('vehicle_log'), vehicleId, 'insurance', '2026-05-10', 'Gomur Insurance', 'Annual insurance renewed.', null, adminId, NOW);
+	}
 });
 
 run();
